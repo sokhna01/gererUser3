@@ -7,58 +7,46 @@ import beans.User;
 
 
 public class Userdao {
-	
-	private static ArrayList<User> utilisateurs = new ArrayList<User>();
-	
-//	public static void main(String[] args) throws SQLException{
-//		
-//		int id;
-//	
-//
-//      	//Creation de la connexion
-//		
-//		
-//		//Création des requetes
-//		
-//	}
-	
-	public static void ajouter(String nom, String prenom, String login, String password) throws SQLException {
 
-		Connection con = DriverManager.getConnection("jdbc:mysql://localhost:3306/gererUser","root","");
-		preparedStatement stmt;
+	public static boolean ajouter(User utilisateur) throws SQLException {
+
 		
-//		try( stmt= con.prepareStatement("INSERT INTO Utilisateurs(nom,prenom,login,password) VALUES(?,?,?,?)" ) ){
-//		
-//		stmt.setString(2,nom);
-//		stmt.setString(3,prenom);
-//		stmt.setString(4,login);
-//		stmt.setString(5,password);
-//		
-//		  int numRowsAffected = stmt.executeUpdate();
-//		   Logger.getLogger(PatientBase.class).log(Level.DEBUG, numRowsAffected + " were inserted");
-//		} catch (SQLException ex) {
-//		     Logger.getLogger(PatientBase.class).log(Level.SEVERE, null, ex);
-//		    }
-		
-		   try(stmt = conn.prepareStatement("INSERT INTO patients (id, surname) VALUES (?, ?)") {
-			   stmt.setInt(1, 1);
-			   stmt.setString(2, mySurname);
+		try {
+			//COnnexion a la BDD
+			Connection con = DriverManager.getConnection("jdbc:mysql://localhost:3306/gererUser","root","");
+			
+			//Creer la requete
+			String insertCmd = "INSERT INTO utilisateurs(nom,prenom,login,password)" + "VALUES (?, ?,?,?)";
+			PreparedStatement preparedStmt = con.prepareStatement(insertCmd);
+			preparedStmt.setString(1,utilisateur.getNom());
+			preparedStmt.setString(2,utilisateur.getPrenom());
+			preparedStmt.setString(3,utilisateur.getLogin());
+			preparedStmt.setString(4,utilisateur.getPassword());
+			
+			//Execute la requete
+			preparedStmt.executeUpdate();
+			
+			//fermer la connexion
+			con.close();
+			return true;
+		} catch (SQLException e) {
+			e.printStackTrace();
+			return false;
+		}
 
-			   int numRowsAffected = stmt.executeUpdate();
-			   Logger.getLogger(PatientBase.class).log(Level.DEBUG, numRowsAffected + " were inserted");
-			} catch (SQLException ex) {
-			     Logger.getLogger(PatientBase.class).log(Level.SEVERE, null, ex);
-			    }
-
-	
 	}
 	
 	
 	public static ArrayList<User> lister() throws SQLException{
 		
+		//COnnexion a la BDD
 		Connection con = DriverManager.getConnection("jdbc:mysql://localhost:3306/gererUser","root","");
-		String insertCmd = "SELECT * FROM Utilisateurs";
+		
+		//Creation de la requete
+		String insertCmd = "SELECT * FROM utilisateurs";
 		Statement stmt= con.createStatement();
+		
+		//Execution de la requete 
 		ResultSet rs = stmt.executeQuery(insertCmd);
 		ArrayList<User> utilisateurs = new ArrayList<>();
 		
@@ -66,47 +54,87 @@ public class Userdao {
 		  User utilisateur = new User(rs.getInt("id"), rs.getString("nom"), rs.getString("prenom"), rs.getString("login"),rs.getString("password"));
 	        utilisateurs.add(utilisateur);
 		}
+		
+		//fermeture de la connexion
+		con.close();
 		return utilisateurs;
 		
 	}  
 	
 	public static boolean supprimer(int id) {
 
-		for(User utilisateur : utilisateurs) {
-			if(utilisateur.getId()==id) {
-				utilisateurs.remove(utilisateur);
-			}
+		try {
+			//Connexion a la BDD
+			Connection con = DriverManager.getConnection("jdbc:mysql://localhost:3306/gererUser","root","");
+			String deleteCmd = "DELETE FROM utilisateurs WHERE  id=?";
+			
+			//Création de la requete
+			PreparedStatement preparedStmt = con.prepareStatement(deleteCmd);
+			preparedStmt.setInt(1, id);
+			
+			//Execution de la requete
+			preparedStmt.execute();
+			con.close();
+			
+			//fermeture de la connexion
 			return true;
+		} catch (SQLException e) {
+			e.printStackTrace();
+			return false;
 		}
-		return false;
 	}
 	
 	public static boolean modifier(User utilisateur ) {
 
-		for(User user : utilisateurs) {
-			if(user.getId()==utilisateur.getId()) 
-			{
-				user.setNom(utilisateur.getNom());
-				user.setPrenom(utilisateur.getPrenom());
-				user.setLogin(utilisateur.getLogin());
-				user.setPassword(utilisateur.getPassword());
-			}
+		try {
+			//Connexion a la BDD
+			Connection con = DriverManager.getConnection("jdbc:mysql://localhost:3306/gererUser","root","");
+			String updateCmd = "UPDATE utilisateurs set nom=?,prenom=?,login=?,password=? where id=?";
+			
+			//Création de la requete
+			PreparedStatement preparedStmt = con.prepareStatement(updateCmd);
+			
+			preparedStmt.setString(1,utilisateur.getNom());
+    		preparedStmt.setString(2,utilisateur.getPrenom());
+    		preparedStmt.setString(3,utilisateur.getLogin());
+    		preparedStmt.setString(4,utilisateur.getPassword());
+    		preparedStmt.setInt(5,utilisateur.getId());
+    		
+    		//Exécutioon de la requete
+			preparedStmt.executeUpdate();
+			
+			//fermeture de la connexion
+			con.close();
 			return true;
+			} catch (SQLException e) {
+			e.printStackTrace();
+			return false;
 		}
-		return false;
 	}
 	
 	public static User get(int id) {
-		
-		for(User utilisateur : utilisateurs) {
-			if(utilisateur.getId()==id) {
-				return utilisateur;
-			}
-		}
-		return null;
+		 try {
+			//Connexion a la BDD
+			Connection con = DriverManager.getConnection("jdbc:mysql://localhost:3306/gererUser","root","");
+				String getCmd = "SELECT * FROM utilisateurs WHERE id = ?";
+				
+			//Création de la requete
+	            PreparedStatement stmt = con.prepareStatement(getCmd);
+	            stmt.setInt(1, id);
+	            
+	        //Execution de la requete
+	            ResultSet rs = stmt.executeQuery();
+	            if (rs.next()) {
+	             User utilisateur = new User(rs.getInt("id"), rs.getString("nom"),rs.getString("prenom"), rs.getString("login"), rs.getString("password"));
+	      
+	        //Fermeture de la connexion     
+	             con.close();   
+	             return utilisateur;
+	            }
+	        } catch (SQLException e) {
+	        	e.printStackTrace();
+	        }
+		 return null;
 
-	}
-
-	
-	
+	}	
 }

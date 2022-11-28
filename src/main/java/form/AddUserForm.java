@@ -1,6 +1,7 @@
 package form;
 
 import java.sql.SQLException;
+
 import java.util.HashMap;
 
 import java.util.Map;
@@ -38,17 +39,17 @@ public class AddUserForm {
 	}
 	
 	public boolean ajouter() throws SQLException { 
-//		String nom = this.getParameter(CHAMP_NOM);
-//		String prenom = this.getParameter(CHAMP_PRENOM);
-//		String login = this.getParameter(CHAMP_LOGIN);
-//		String password = this.getParameter(CHAMP_PASSWORD);
-//	
-//		this.utilisateur = new User(nom, prenom, login, password);
+		String nom = this.getParameter(CHAMP_NOM);
+		String prenom = this.getParameter(CHAMP_PRENOM);
+		String login = this.getParameter(CHAMP_LOGIN);
+		String password = this.getParameter(CHAMP_PASSWORD);
+	
+		this.utilisateur = new User(nom, prenom, login, password);
 		this.validerChamps(CHAMP_NOM,CHAMP_PRENOM,CHAMP_LOGIN,CHAMP_PASSWORD,CHAMP_PASSWORD_BIS);
 		this.validerPasswords();
 		
 		if(this.erreurs.isEmpty()) {
-			Userdao.ajouter(CHAMP_NOM, CHAMP_PRENOM, CHAMP_LOGIN, CHAMP_PASSWORD);
+			Userdao.ajouter(utilisateur);
 			this.status=true;
 			this.statusMessage = SUCCES_AJOUT_MESSAGE;
 		}
@@ -98,3 +99,4 @@ public class AddUserForm {
 	}
 	
 }
+
